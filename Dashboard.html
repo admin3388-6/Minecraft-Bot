@@ -1,0 +1,324 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zero Bot Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .status-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+        
+        .status-online {
+            background-color: #4CAF50;
+            box-shadow: 0 0 10px #4CAF50;
+        }
+        
+        .status-offline {
+            background-color: #f44336;
+            box-shadow: 0 0 10px #f44336;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .console-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        
+        .log-info {
+            color: #81C784;
+        }
+        
+        .log-warn {
+            color: #FFB74D;
+            background: rgba(255, 183, 77, 0.1);
+        }
+        
+        .log-error {
+            color: #E57373;
+            background: rgba(229, 115, 115, 0.1);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .refresh-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .refresh-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Zero Bot Dashboard</h1>
+            <p>مراقبة البوت في الوقت الفعلي</p>
+        </div>
+        
+        <div class="status-card">
+            <h2>حالة البوت <span class="status-indicator" id="statusIndicator"></span></h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="botStatus">غير متصل</div>
+                    <div class="stat-label">حالة الاتصال</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="serverInfo">Patient_Zero0980.aternos.me:14467</div>
+                    <div class="stat-label">الخادم</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="uptime">00:00:00</div>
+                    <div class="stat-label">وقت التشغيل</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="position">غير محدد</div>
+                    <div class="stat-label">الموقع</div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 15px;">
+                <button class="refresh-btn" onclick="refreshData()">تحديث البيانات</button>
+            </div>
+        </div>
+        
+        <div class="grid">
+            <div class="status-card">
+                <h3>📋 سجل وحدة التحكم</h3>
+                <div class="console-box" id="consoleLog">
+                    <div class="log-entry log-info">جاري تحميل سجل وحدة التحكم...</div>
+                </div>
+            </div>
+            
+            <div class="status-card">
+                <h3>🎯 الأحداث الأخيرة</h3>
+                <div class="console-box" id="eventLog">
+                    <div class="log-entry log-info">جاري تحميل الأحداث...</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="status-card">
+            <h3>⚙️ إعدادات البوت</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="username">zero_bot_hosting07</div>
+                    <div class="stat-label">اسم البوت</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="antiAfk">معطل</div>
+                    <div class="stat-label">مقاومة AFK</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="autoAuth">معطل</div>
+                    <div class="stat-label">تسجيل الدخول التلقائي</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="autoReconnect">مفعل</div>
+                    <div class="stat-label">إعادة الاتصال التلقائي</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let botData = {
+            isOnline: false,
+            startTime: Date.now(),
+            logs: [],
+            events: [],
+            position: { x: 0, y: 0, z: 0 }
+        };
+
+        function updateStatus() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    botData = { ...botData, ...data };
+                    updateUI();
+                })
+                .catch(error => {
+                    console.error('خطأ في جلب البيانات:', error);
+                    botData.isOnline = false;
+                    updateUI();
+                });
+        }
+
+        function updateUI() {
+            // تحديث مؤشر الحالة
+            const statusIndicator = document.getElementById('statusIndicator');
+            const botStatusText = document.getElementById('botStatus');
+            
+            if (botData.isOnline) {
+                statusIndicator.className = 'status-indicator status-online';
+                botStatusText.textContent = 'متصل';
+            } else {
+                statusIndicator.className = 'status-indicator status-offline';
+                botStatusText.textContent = 'غير متصل';
+            }
+
+            // تحديث وقت التشغيل
+            const uptime = Math.floor((Date.now() - botData.startTime) / 1000);
+            const hours = Math.floor(uptime / 3600).toString().padStart(2, '0');
+            const minutes = Math.floor((uptime % 3600) / 60).toString().padStart(2, '0');
+            const seconds = (uptime % 60).toString().padStart(2, '0');
+            document.getElementById('uptime').textContent = `${hours}:${minutes}:${seconds}`;
+
+            // تحديث الموقع
+            if (botData.position) {
+                document.getElementById('position').textContent = 
+                    `${Math.round(botData.position.x)}, ${Math.round(botData.position.y)}, ${Math.round(botData.position.z)}`;
+            }
+
+            // تحديث سجل وحدة التحكم
+            const consoleLog = document.getElementById('consoleLog');
+            consoleLog.innerHTML = botData.logs.slice(-20).map(log => 
+                `<div class="log-entry log-${log.level}">[${log.time}] ${log.message}</div>`
+            ).join('');
+            consoleLog.scrollTop = consoleLog.scrollHeight;
+
+            // تحديث سجل الأحداث
+            const eventLog = document.getElementById('eventLog');
+            eventLog.innerHTML = botData.events.slice(-20).map(event => 
+                `<div class="log-entry log-info">[${event.time}] ${event.message}</div>`
+            ).join('');
+            eventLog.scrollTop = eventLog.scrollHeight;
+        }
+
+        function refreshData() {
+            updateStatus();
+        }
+
+        function addLog(level, message) {
+            const time = new Date().toLocaleTimeString('ar-SA');
+            botData.logs.push({ level, message, time });
+            if (botData.logs.length > 100) {
+                botData.logs = botData.logs.slice(-100);
+            }
+        }
+
+        function addEvent(message) {
+            const time = new Date().toLocaleTimeString('ar-SA');
+            botData.events.push({ message, time });
+            if (botData.events.length > 100) {
+                botData.events = botData.events.slice(-100);
+            }
+        }
+
+        // تحديث البيانات كل 5 ثوان
+        setInterval(updateStatus, 5000);
+        
+        // تحديث وقت التشغيل كل ثانية
+        setInterval(() => {
+            if (botData.isOnline) {
+                const uptime = Math.floor((Date.now() - botData.startTime) / 1000);
+                const hours = Math.floor(uptime / 3600).toString().padStart(2, '0');
+                const minutes = Math.floor((uptime % 3600) / 60).toString().padStart(2, '0');
+                const seconds = (uptime % 60).toString().padStart(2, '0');
+                document.getElementById('uptime').textContent = `${hours}:${minutes}:${seconds}`;
+            }
+        }, 1000);
+
+        // التحديث الأولي
+        updateStatus();
+    </script>
+</body>
+</html>
